@@ -122,6 +122,14 @@ body {
 .content { flex: 1; overflow-y: auto; padding: var(--pad-6); }
 .content-narrow { max-width: 1180px; margin: 0 auto; width: 100%; }
 
+/* ── 響應式內容網格（以 class 取代內聯 grid，方便斷點堆疊）── */
+.grid-2col   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.detail-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+.map-grid    { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 16px; align-items: start; }
+.keystat-grid { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--ore-border); background: var(--ore-bg); }
+.keystat { padding: var(--pad-4); border-right: 1px solid var(--ore-border); }
+.keystat:last-child { border-right: none; }
+
 /* 卡片 */
 .card {
   background: var(--ore-card-bg); border: 1px solid var(--ore-border);
@@ -215,12 +223,42 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin .7s linear infinite; }
 
-/* 響應式：窄螢幕收起側欄文字 */
+/* ── 響應式 ── */
+
+/* 中型：雙欄堆疊成單欄 */
+@media (max-width: 900px) {
+  .map-grid, .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* 平板以下：收起側欄文字成 icon rail */
 @media (max-width: 820px) {
   .sidebar { width: 60px; padding: var(--pad-4) 8px; align-items: center; }
-  .sidebar .nav-label, .sidebar .nav-section-label, .sidebar .brand-tag { display: none; }
+  .sidebar .nav-label, .sidebar .nav-section-label, .sidebar .brand-tag,
+  .sidebar .sidebar-promo { display: none; }
   .sidebar .nav-item { justify-content: center; padding: 10px; width: 40px; }
   .content { padding: var(--pad-4); }
+}
+
+/* 手機：所有雙欄/多欄堆疊、標題縮小、TopBar 精簡 */
+@media (max-width: 760px) {
+  .grid-2col { grid-template-columns: 1fr; }
+  .keystat-grid { grid-template-columns: repeat(3, 1fr); }
+  .keystat { border-bottom: 1px solid var(--ore-border); }
+  .keystat:nth-child(3n) { border-right: none; }
+  .page-title { font-size: 19px; }
+  .hero-title { font-size: 25px !important; }
+  .topbar { padding: 0 var(--pad-3); gap: 8px; }
+  .topbar .status-pill, .topbar .sync-time, .topbar .topbar-divider { display: none; }
+}
+
+/* 小手機：keystat 改兩欄、首頁搜尋鈕收成 icon */
+@media (max-width: 480px) {
+  .keystat-grid { grid-template-columns: repeat(2, 1fr); }
+  .keystat:nth-child(3n) { border-right: 1px solid var(--ore-border); }
+  .keystat:nth-child(2n) { border-right: none; }
+  .content { padding: var(--pad-3); }
+  .hero-title { font-size: 22px !important; }
+  .search-btn-label { display: none; }
 }
 
 /* ── Tweaks 啟動鈕（standalone：取代 design-host 啟用協定）── */

@@ -27,7 +27,7 @@ export function TopBar({ onToggleLayout, dark, onToggleDark, lastSync, onExport 
         <span style={{ fontSize: 11.5, color: 'var(--ore-fg-muted)' }} className="sync-time">
           最後更新 <span className="mono">{lastSync}</span>
         </span>
-        <div style={{ width: 1, height: 22, background: 'var(--ore-border)', margin: '0 4px' }}></div>
+        <div className="topbar-divider" style={{ width: 1, height: 22, background: 'var(--ore-border)', margin: '0 4px' }}></div>
         <button className="btn btn-secondary btn-sm" onClick={onExport}><i className="pi pi-download"></i>匯出</button>
         <button className="icon-btn" title="切換導覽版面" onClick={onToggleLayout}><i className="pi pi-th-large"></i></button>
         <button className="icon-btn" title="深淺色" onClick={onToggleDark}><i className={`pi ${dark ? 'pi-sun' : 'pi-moon'}`}></i></button>
@@ -55,7 +55,7 @@ export function Sidebar({ view, onNav, rail }:
         <i className="pi pi-cog"></i><span className="nav-label">設定</span>
       </div>
       {!rail && (
-        <div style={{ padding: '12px', marginTop: 8, borderRadius: 10, background: 'var(--brand-50)', border: '1px solid var(--ore-border)' }}>
+        <div className="sidebar-promo" style={{ padding: '12px', marginTop: 8, borderRadius: 10, background: 'var(--brand-50)', border: '1px solid var(--ore-border)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand-600)', marginBottom: 4 }}>本月已收錄</div>
           <div className="mono" style={{ fontSize: 20, fontWeight: 800, color: 'var(--ore-fg)' }}>9,234</div>
           <div style={{ fontSize: 10.5, color: 'var(--ore-fg-muted)' }}>筆成交紀錄</div>

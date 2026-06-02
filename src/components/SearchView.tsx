@@ -40,7 +40,7 @@ export function SearchView({ onSearch, setDistrict, query, setQuery, filters, to
     <div className="content-narrow fade-up">
       {/* Hero */}
       <div style={{ textAlign: 'center', padding: '8px 0 var(--pad-6)' }}>
-        <h1 style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-.03em', color: 'var(--ore-fg)', lineHeight: 1.15 }}>
+        <h1 className="hero-title" style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-.03em', color: 'var(--ore-fg)', lineHeight: 1.15 }}>
           台中市實價登錄，<span style={{ color: 'var(--brand)' }}>一次查清</span>
         </h1>
         <p style={{ fontSize: 14.5, color: 'var(--ore-fg-muted)', marginTop: 10 }}>
@@ -56,7 +56,7 @@ export function SearchView({ onSearch, setDistrict, query, setQuery, filters, to
                value={query} onChange={e => setQuery(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && onSearch()} />
         <button className="btn btn-primary" style={{ padding: '11px 22px', fontSize: 14.5 }} onClick={() => onSearch()}>
-          <i className="pi pi-search"></i>查詢
+          <i className="pi pi-search"></i><span className="search-btn-label">查詢</span>
         </button>
       </div>
 

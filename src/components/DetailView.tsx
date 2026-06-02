@@ -7,7 +7,7 @@ import { TrendChart } from './charts/Charts';
 function KeyStat({ label, value, unit, accent }:
   { label: string; value: string | number; unit?: string; accent?: boolean }) {
   return (
-    <div style={{ padding: 'var(--pad-4)', borderRight: '1px solid var(--ore-border)' }}>
+    <div className="keystat">
       <div style={{ fontSize: 11.5, color: 'var(--ore-fg-muted)', marginBottom: 5 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
         <span className="mono" style={{ fontSize: 23, fontWeight: 800, color: accent ? 'var(--brand)' : 'var(--ore-fg)', letterSpacing: '-.02em' }}>{value}</span>
@@ -88,19 +88,19 @@ export function DetailView({ t, onBack, chartMode, showGrid }: DetailViewProps) 
             <div className="mono" style={{ fontSize: 13, color: 'var(--ore-fg-muted)', marginTop: 2 }}>{t.unit} 萬/坪 · {t.date}</div>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', borderTop: '1px solid var(--ore-border)', background: 'var(--ore-bg)' }}>
+        <div className="keystat-grid">
           <KeyStat label="權狀坪數" value={t.ping} unit="坪" />
           <KeyStat label="單價" value={t.unit} unit="萬/坪" accent />
           <KeyStat label="樓層" value={t.floor} />
           <KeyStat label="屋齡" value={t.age} unit="年" />
-          <div style={{ padding: 'var(--pad-4)' }}>
+          <div className="keystat">
             <div style={{ fontSize: 11.5, color: 'var(--ore-fg-muted)', marginBottom: 5 }}>格局</div>
             <div className="mono" style={{ fontSize: 23, fontWeight: 800, color: 'var(--ore-fg)' }}>{t.rooms}<span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ore-fg-muted)' }}> 房</span></div>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 16 }}>
+      <div className="detail-grid">
         {/* 趨勢 */}
         <div className="card card-pad">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>

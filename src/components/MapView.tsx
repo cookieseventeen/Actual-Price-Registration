@@ -90,7 +90,7 @@ export function MapView({ barRounded, showGrid }: MapViewProps) {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.05fr) minmax(0, 0.95fr)', gap: 16, alignItems: 'start' }}>
+      <div className="map-grid">
         {/* 地圖 */}
         <div className="card card-pad">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>

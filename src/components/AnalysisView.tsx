@@ -54,7 +54,7 @@ export function AnalysisView({ chartMode, showGrid, barRounded }: AnalysisViewPr
         <TrendChart data={trend.unit} labels={trend.months} mode={chartMode} showGrid={showGrid} unit=" 萬/坪" valueFmt={v => v.toFixed(0)} height={250} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="grid-2col" style={{ marginBottom: 16 }}>
         {/* 行政區排行 */}
         <div className="card card-pad">
           <h3 className="section-title" style={{ marginBottom: 4 }}>行政區單價排行</h3>
