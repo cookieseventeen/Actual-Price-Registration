@@ -19,6 +19,10 @@ designed in [Claude Design](https://claude.ai/design). The original prototype
   data-source provenance, same-community + nearby comparables.
 - **行情分析 (Analysis)** — city price trend, district ranking, price distribution
   histogram, monthly volume.
+- **房價地圖 (Price map)** — nationwide Taiwan county map with 3D pillars whose
+  height ∝ average price, brand-tinted choropleth regions, linked ranking list,
+  and an outlying-islands (金門 / 連江) inset. Pure-SVG, real county outlines
+  (g0v GeoJSON, Douglas-Peucker simplified) projected into `src/data/taiwanGeo.ts`.
 - **資料來源 (Data sources)** — per-district crawl-task status (done / running /
   queued / failed), schedule and durations.
 - **匯出 (Export)** — format picker (CSV / Excel / JSON) + column selection +
@@ -52,6 +56,7 @@ src/
   App.tsx                routing + tweak state, applies tokens to :root
   types.ts               shared Filters / SortState / ViewMode types
   data/mock.ts           Taichung mock dataset (typed)
+  data/taiwanGeo.ts      Taiwan county SVG paths + centroids + mock prices (generated)
   lib/format.ts          price formatting helpers (萬 / 億)
   styles/
     tokens.css           OreNote design-system custom properties
@@ -64,6 +69,7 @@ src/
     ResultsView.tsx
     DetailView.tsx
     AnalysisView.tsx
+    MapView.tsx          nationwide 3D pillar price map
     DataView.tsx         data-source page + ExportModal
 ```
 

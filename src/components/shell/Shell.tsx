@@ -1,11 +1,12 @@
 // 框架元件：TopBar、導覽
 
-export type ViewId = 'search' | 'results' | 'analysis' | 'data';
+export type ViewId = 'search' | 'results' | 'analysis' | 'map' | 'data';
 
 export const NAV_ITEMS: { id: ViewId; label: string; icon: string }[] = [
   { id: 'search',   label: '搜尋',     icon: 'pi-search' },
   { id: 'results',  label: '成交紀錄', icon: 'pi-list' },
   { id: 'analysis', label: '行情分析', icon: 'pi-chart-bar' },
+  { id: 'map',      label: '房價地圖', icon: 'pi-map' },
   { id: 'data',     label: '資料來源', icon: 'pi-database' },
 ];
 

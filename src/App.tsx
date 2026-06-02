@@ -10,6 +10,7 @@ import { SearchView } from './components/SearchView';
 import { ResultsView } from './components/ResultsView';
 import { DetailView } from './components/DetailView';
 import { AnalysisView } from './components/AnalysisView';
+import { MapView } from './components/MapView';
 import { DataView, ExportModal } from './components/DataView';
 import {
   useTweaks, TweaksPanel, TweakSection,
@@ -112,6 +113,8 @@ export default function App() {
                            toggleFilter={toggleFilter} viewMode={viewMode} setViewMode={setViewMode} sort={sort} setSort={setSort} onOpen={openDetail} />
             ) : view === 'analysis' ? (
               <AnalysisView chartMode={t.chartMode} showGrid={t.showGrid} barRounded={t.barRounded} />
+            ) : view === 'map' ? (
+              <MapView barRounded={t.barRounded} showGrid={t.showGrid} />
             ) : (
               <DataView />
             )}
