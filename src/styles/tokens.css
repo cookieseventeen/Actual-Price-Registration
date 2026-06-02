@@ -1,0 +1,273 @@
+/*
+ * OreNote Design System — CSS Custom Properties
+ * Source of truth: docs/UI_DESIGN.md (orenote repo)
+ * Fonts (Noto Sans TC + JetBrains Mono) load from Google Fonts via a <link>
+ * in index.html (dynamic unicode-range subsetting keeps CJK page-weight small).
+ * Base size: 14px — productivity-tool density
+ */
+
+:root {
+  /* ─────────────────────────────────────────────
+   * PRIMARY — 礦石藍綠 (Ore Blue-Green)
+   * Brand anchor: #38b2a0 (primary-400)
+   * ───────────────────────────────────────────── */
+  --ore-primary-50:  #eef9f7;
+  --ore-primary-100: #d0f0ea;
+  --ore-primary-200: #a2e2d5;
+  --ore-primary-300: #66ccba;
+  --ore-primary-400: #38b2a0;   /* ← brand primary */
+  --ore-primary-500: #2a9688;
+  --ore-primary-600: #1e7a6e;
+  --ore-primary-700: #195f55;
+  --ore-primary-800: #164844;
+  --ore-primary-900: #123b38;
+
+  /* ─────────────────────────────────────────────
+   * NEUTRAL — Slate grays
+   * ───────────────────────────────────────────── */
+  --ore-neutral-0:   #ffffff;
+  --ore-neutral-50:  #f8fafc;
+  --ore-neutral-100: #f1f5f9;
+  --ore-neutral-200: #e2e8f0;
+  --ore-neutral-300: #cbd5e1;
+  --ore-neutral-400: #94a3b8;
+  --ore-neutral-500: #64748b;
+  --ore-neutral-600: #475569;
+  --ore-neutral-700: #334155;
+  --ore-neutral-800: #1e293b;
+  --ore-neutral-900: #0f172a;
+
+  /* ─────────────────────────────────────────────
+   * SEMANTIC
+   * ───────────────────────────────────────────── */
+  --ore-success:  #22c55e;
+  --ore-warning:  #f59e0b;
+  --ore-danger:   #ef4444;
+  --ore-info:     #3b82f6;
+
+  /* ─────────────────────────────────────────────
+   * CANVAS-SPECIFIC
+   * ───────────────────────────────────────────── */
+  --ore-canvas-bg:           #f0f4f8;
+  --ore-canvas-grid:         rgba(148, 163, 184, 0.3);
+  --ore-edge-default:        #38b2a0;
+  --ore-edge-hover:          #1e7a6e;
+  --ore-node-bg:             #ffffff;
+  --ore-node-border:         #e2e8f0;
+  --ore-node-border-active:  #38b2a0;
+  --ore-node-shadow:         0 2px 8px rgba(0, 0, 0, 0.08);
+  --ore-node-shadow-hover:   0 4px 16px rgba(56, 178, 160, 0.2);
+
+  /* ─────────────────────────────────────────────
+   * SEMANTIC SURFACE (light mode)
+   * Mirrors PrimeNG / tailwindcss-primeui tokens
+   * ───────────────────────────────────────────── */
+  --ore-surface-0:    var(--ore-neutral-0);
+  --ore-surface-50:   var(--ore-neutral-50);
+  --ore-surface-100:  var(--ore-neutral-100);
+  --ore-surface-200:  var(--ore-neutral-200);
+  --ore-surface-700:  var(--ore-neutral-700);
+  --ore-surface-900:  var(--ore-neutral-900);
+  --ore-bg:           var(--ore-neutral-50);       /* page background */
+  --ore-fg:           var(--ore-neutral-900);       /* primary text */
+  --ore-fg-muted:     var(--ore-neutral-500);       /* secondary text */
+  --ore-border:       var(--ore-neutral-200);       /* default border */
+
+  /* ─────────────────────────────────────────────
+   * TYPOGRAPHY
+   * ───────────────────────────────────────────── */
+  --ore-font-family:  'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --ore-font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Font sizes */
+  --ore-text-2xs:   0.625rem;   /* 10px */
+  --ore-text-xs:    0.75rem;    /* 12px */
+  --ore-text-sm:    0.875rem;   /* 14px  ← body base */
+  --ore-text-base:  1rem;       /* 16px */
+  --ore-text-lg:    1.125rem;   /* 18px */
+  --ore-text-xl:    1.25rem;    /* 20px */
+  --ore-text-2xl:   1.5rem;     /* 24px */
+  --ore-text-3xl:   1.875rem;   /* 30px */
+  --ore-text-4xl:   2.25rem;    /* 36px */
+
+  /* Font weights */
+  --ore-font-normal:    400;
+  --ore-font-medium:    500;
+  --ore-font-semibold:  600;
+  --ore-font-bold:      700;
+
+  /* Line heights */
+  --ore-leading-tight:   1.25;
+  --ore-leading-snug:    1.375;
+  --ore-leading-normal:  1.5;
+  --ore-leading-relaxed: 1.625;
+
+  /* Letter spacing */
+  --ore-tracking-tight:  -0.025em;
+  --ore-tracking-normal:  0em;
+  --ore-tracking-wide:    0.025em;
+
+  /* ─────────────────────────────────────────────
+   * SPACING — 4px base grid
+   * ───────────────────────────────────────────── */
+  --ore-space-0:   0;
+  --ore-space-1:   0.25rem;   /* 4px  */
+  --ore-space-2:   0.5rem;    /* 8px  */
+  --ore-space-3:   0.75rem;   /* 12px */
+  --ore-space-4:   1rem;      /* 16px */
+  --ore-space-5:   1.25rem;   /* 20px */
+  --ore-space-6:   1.5rem;    /* 24px */
+  --ore-space-8:   2rem;      /* 32px */
+  --ore-space-10:  2.5rem;    /* 40px */
+  --ore-space-12:  3rem;      /* 48px */
+  --ore-space-16:  4rem;      /* 64px */
+
+  /* ─────────────────────────────────────────────
+   * BORDER RADIUS
+   * ───────────────────────────────────────────── */
+  --ore-radius-sm:   4px;
+  --ore-radius-md:   8px;
+  --ore-radius-lg:   12px;
+  --ore-radius-xl:   16px;
+  --ore-radius-2xl:  24px;
+  --ore-radius-full: 9999px;
+
+  /* ─────────────────────────────────────────────
+   * SHADOWS
+   * ───────────────────────────────────────────── */
+  --ore-shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.05);
+  --ore-shadow-sm:  0 2px 4px rgba(0, 0, 0, 0.06);
+  --ore-shadow-md:  0 4px 8px rgba(0, 0, 0, 0.08);
+  --ore-shadow-lg:  0 8px 24px rgba(0, 0, 0, 0.10);
+  --ore-shadow-xl:  0 16px 48px rgba(0, 0, 0, 0.12);
+  --ore-shadow-teal: 0 4px 16px rgba(56, 178, 160, 0.2);  /* canvas node hover */
+
+  /* ─────────────────────────────────────────────
+   * SEMANTIC COMPONENT TOKENS
+   * ───────────────────────────────────────────── */
+
+  /* Headings */
+  --ore-h1-size:    var(--ore-text-3xl);
+  --ore-h1-weight:  var(--ore-font-bold);
+  --ore-h1-leading: var(--ore-leading-tight);
+
+  --ore-h2-size:    var(--ore-text-2xl);
+  --ore-h2-weight:  var(--ore-font-bold);
+  --ore-h2-leading: var(--ore-leading-tight);
+
+  --ore-h3-size:    var(--ore-text-xl);
+  --ore-h3-weight:  var(--ore-font-semibold);
+  --ore-h3-leading: var(--ore-leading-snug);
+
+  --ore-h4-size:    var(--ore-text-lg);
+  --ore-h4-weight:  var(--ore-font-semibold);
+  --ore-h4-leading: var(--ore-leading-snug);
+
+  /* Body */
+  --ore-body-size:    var(--ore-text-sm);
+  --ore-body-weight:  var(--ore-font-normal);
+  --ore-body-leading: var(--ore-leading-normal);
+
+  --ore-body-sm-size: var(--ore-text-xs);
+
+  /* Code */
+  --ore-code-family: var(--ore-font-mono);
+  --ore-code-size:   0.85em;  /* relative to context */
+  --ore-code-bg:     var(--ore-neutral-100);
+  --ore-code-border: var(--ore-neutral-200);
+  --ore-code-radius: var(--ore-radius-sm);
+
+  /* Card */
+  --ore-card-bg:     var(--ore-neutral-0);
+  --ore-card-border: 1px solid var(--ore-node-border);
+  --ore-card-radius: var(--ore-radius-lg);
+  --ore-card-shadow: var(--ore-shadow-md);
+
+  /* TopBar */
+  --ore-topbar-height: 60px;
+  --ore-topbar-px:     var(--ore-space-6);
+  --ore-topbar-border: 1px solid var(--ore-neutral-200);
+
+  /* Article Panel */
+  --ore-panel-width:   300px;
+  --ore-panel-min:     240px;
+  --ore-panel-max:     480px;
+
+  /* Toolbar */
+  --ore-toolbar-height: 48px;
+}
+
+/* ─────────────────────────────────────────────
+ * DARK MODE OVERRIDES
+ * ───────────────────────────────────────────── */
+[data-theme='dark'],
+.app-dark {
+  --ore-canvas-bg:    #0f172a;
+  --ore-canvas-grid:  rgba(148, 163, 184, 0.1);
+  --ore-node-bg:      #1e293b;
+  --ore-node-border:  #334155;
+
+  --ore-bg:           var(--ore-neutral-900);
+  --ore-fg:           var(--ore-neutral-50);
+  --ore-fg-muted:     var(--ore-neutral-400);
+  --ore-border:       var(--ore-neutral-700);
+  --ore-card-bg:      var(--ore-neutral-800);
+  --ore-code-bg:      var(--ore-neutral-800);
+  --ore-code-border:  var(--ore-neutral-700);
+}
+
+/* ─────────────────────────────────────────────
+ * BASE ELEMENT STYLES
+ * Apply in design-system preview HTML files
+ * ───────────────────────────────────────────── */
+.ore-base {
+  font-family: var(--ore-font-family);
+  font-size: var(--ore-text-sm);
+  font-weight: var(--ore-font-normal);
+  line-height: var(--ore-leading-normal);
+  color: var(--ore-fg);
+  background: var(--ore-bg);
+}
+
+.ore-h1 {
+  font-size: var(--ore-h1-size);
+  font-weight: var(--ore-h1-weight);
+  line-height: var(--ore-h1-leading);
+  letter-spacing: var(--ore-tracking-tight);
+}
+.ore-h2 {
+  font-size: var(--ore-h2-size);
+  font-weight: var(--ore-h2-weight);
+  line-height: var(--ore-h2-leading);
+  letter-spacing: var(--ore-tracking-tight);
+}
+.ore-h3 {
+  font-size: var(--ore-h3-size);
+  font-weight: var(--ore-h3-weight);
+  line-height: var(--ore-h3-leading);
+}
+.ore-h4 {
+  font-size: var(--ore-h4-size);
+  font-weight: var(--ore-h4-weight);
+  line-height: var(--ore-h4-leading);
+}
+.ore-body    { font-size: var(--ore-body-size); line-height: var(--ore-body-leading); }
+.ore-body-sm { font-size: var(--ore-body-sm-size); line-height: var(--ore-leading-normal); }
+.ore-mono    { font-family: var(--ore-font-mono); font-size: var(--ore-text-sm); }
+.ore-muted   { color: var(--ore-fg-muted); }
+
+.ore-code {
+  font-family: var(--ore-code-family);
+  font-size: var(--ore-code-size);
+  background: var(--ore-code-bg);
+  border: 1px solid var(--ore-code-border);
+  border-radius: var(--ore-code-radius);
+  padding: 0.05rem 0.375rem;
+}
+
+.ore-card {
+  background: var(--ore-card-bg);
+  border: var(--ore-card-border);
+  border-radius: var(--ore-card-radius);
+  box-shadow: var(--ore-card-shadow);
+}
