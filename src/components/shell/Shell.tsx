@@ -1,6 +1,9 @@
 // 框架元件：TopBar、導覽
+import { useState } from 'react';
+import type { Member } from '../../lib/auth';
+import { STATUS_META, PLAN_META } from '../../lib/auth';
 
-export type ViewId = 'search' | 'results' | 'analysis' | 'map' | 'data';
+export type ViewId = 'search' | 'results' | 'analysis' | 'map' | 'data' | 'admin';
 
 export const NAV_ITEMS: { id: ViewId; label: string; icon: string }[] = [
   { id: 'search',   label: '搜尋',     icon: 'pi-search' },
@@ -8,11 +11,13 @@ export const NAV_ITEMS: { id: ViewId; label: string; icon: string }[] = [
   { id: 'analysis', label: '行情分析', icon: 'pi-chart-bar' },
   { id: 'map',      label: '房價地圖', icon: 'pi-map' },
   { id: 'data',     label: '資料來源', icon: 'pi-database' },
+  { id: 'admin',    label: '會員管理', icon: 'pi-users' },
 ];
 
 // ── TopBar ──
-export function TopBar({ onToggleLayout, dark, onToggleDark, lastSync, onExport }:
-  { onToggleLayout: () => void; dark: boolean; onToggleDark: () => void; lastSync: string; onExport: () => void }) {
+export function TopBar({ onToggleLayout, dark, onToggleDark, lastSync, onExport, user, onLogin, onLogout, onNav }:
+  { onToggleLayout: () => void; dark: boolean; onToggleDark: () => void; lastSync: string; onExport: () => void;
+    user: Member | null; onLogin: () => void; onLogout: () => void; onNav: (v: ViewId) => void }) {
   return (
     <div className="topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -31,9 +36,69 @@ export function TopBar({ onToggleLayout, dark, onToggleDark, lastSync, onExport 
         <button className="btn btn-secondary btn-sm" onClick={onExport}><i className="pi pi-download"></i>匯出</button>
         <button className="icon-btn" title="切換導覽版面" onClick={onToggleLayout}><i className="pi pi-th-large"></i></button>
         <button className="icon-btn" title="深淺色" onClick={onToggleDark}><i className={`pi ${dark ? 'pi-sun' : 'pi-moon'}`}></i></button>
-        <div className="avatar">陳</div>
+        <UserMenu user={user} onLogin={onLogin} onLogout={onLogout} onNav={onNav} />
       </div>
     </div>
+  );
+}
+
+// ── 使用者選單（頭像）──
+function UserMenu({ user, onLogin, onLogout, onNav }:
+  { user: Member | null; onLogin: () => void; onLogout: () => void; onNav: (v: ViewId) => void }) {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+
+  if (!user) {
+    return <button className="btn btn-primary btn-sm" onClick={onLogin}><i className="pi pi-sign-in"></i>登入 / 註冊</button>;
+  }
+
+  const st = STATUS_META[user.status];
+  return (
+    <div style={{ position: 'relative' }}>
+      <button className="avatar" title={user.name} onClick={() => setOpen(o => !o)}
+        style={{ border: 'none', cursor: 'pointer', position: 'relative' }}>
+        {user.avatar}
+        <span style={{ position: 'absolute', right: -1, bottom: -1, width: 9, height: 9, borderRadius: '50%',
+                       background: st.color, border: '2px solid var(--ore-card-bg)' }}></span>
+      </button>
+
+      {open && <>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 90 }} onClick={close}></div>
+        <div className="card" style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 240, zIndex: 100,
+                                       boxShadow: 'var(--ore-shadow-xl)', overflow: 'hidden' }}>
+          <div style={{ padding: '14px', borderBottom: '1px solid var(--ore-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="avatar" style={{ width: 36, height: 36, flexShrink: 0 }}>{user.avatar}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ore-fg)' }}>{user.name}</div>
+                <div className="mono" style={{ fontSize: 11, color: 'var(--ore-fg-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.email}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+              <span className="tag" style={{ background: st.bg, color: st.color }}><i className={`pi ${st.icon}`} style={{ fontSize: 10 }}></i>{st.label}</span>
+              <span className="tag tag-source">{PLAN_META[user.plan].label}方案</span>
+            </div>
+          </div>
+          <div style={{ padding: 6 }}>
+            <MenuRow icon="pi-users" label="後台管理" onClick={() => { onNav('admin'); close(); }} />
+            <MenuRow icon="pi-sign-out" label="登出" danger onClick={() => { onLogout(); close(); }} />
+          </div>
+        </div>
+      </>}
+    </div>
+  );
+}
+
+function MenuRow({ icon, label, onClick, danger }: { icon: string; label: string; onClick: () => void; danger?: boolean }) {
+  return (
+    <button onClick={onClick}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 10px', borderRadius: 8,
+               border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
+               color: danger ? 'var(--ore-danger)' : 'var(--ore-fg)' }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'var(--ore-surface-100)'; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+      <i className={`pi ${icon}`} style={{ fontSize: 14, width: 16 }}></i>{label}
+    </button>
   );
 }
 

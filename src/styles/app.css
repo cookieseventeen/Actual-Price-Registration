@@ -239,6 +239,11 @@ body {
   .content { padding: var(--pad-4); }
 }
 
+/* 登入頁 hero：窄螢幕隱藏，只留右側登入卡 */
+@media (max-width: 820px) {
+  .auth-hero { display: none !important; }
+}
+
 /* 手機：所有雙欄/多欄堆疊、標題縮小、TopBar 精簡 */
 @media (max-width: 760px) {
   .grid-2col { grid-template-columns: 1fr; }

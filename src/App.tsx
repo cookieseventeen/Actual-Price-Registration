@@ -12,6 +12,12 @@ import { DetailView } from './components/DetailView';
 import { AnalysisView } from './components/AnalysisView';
 import { MapView } from './components/MapView';
 import { DataView, ExportModal } from './components/DataView';
+import { AuthView } from './components/auth/AuthView';
+import { AdminView } from './components/admin/AdminView';
+import {
+  seedMembers, getCurrentUser, setCurrentUser, signOut, STATUS_META,
+} from './lib/auth';
+import type { Member } from './lib/auth';
 import {
   useTweaks, TweaksPanel, TweakSection,
   TweakSlider, TweakToggle, TweakRadio, TweakColor,
@@ -45,6 +51,14 @@ const DENSITY_SCALE: Record<string, number> = { compact: 0.84, regular: 1, comfy
 
 export default function App() {
   const [t, setTweak] = useTweaks<TweakValues>(TWEAK_DEFAULTS);
+
+  // 認證 / 會員（純前端，localStorage 持久化）
+  const [currentUser, setCurrentUserState] = useState<Member | null>(() => { seedMembers(); return getCurrentUser(); });
+  const [showAuth, setShowAuth] = useState(false);
+
+  function handleAuthComplete(m: Member) { setCurrentUser(m.id); setCurrentUserState(m); setShowAuth(false); }
+  function handleLogout() { signOut(); setCurrentUserState(null); if (view === 'admin') setView('search'); }
+  function refreshCurrentUser() { setCurrentUserState(getCurrentUser()); }
 
   const [view, setView] = useState<ViewId>('search');
   const [detail, setDetail] = useState<Transaction | null>(null);
@@ -88,12 +102,21 @@ export default function App() {
   const rail = t.layout === 'rail';
   const navView: ViewId = detail ? 'results' : view;
 
+  // 登入 / 註冊頁：全螢幕，不含 shell
+  if (showAuth) {
+    return <AuthView onComplete={handleAuthComplete} onCancel={() => setShowAuth(false)} />;
+  }
+
+  // 已登入但帳號待審核 → 顯示提示橫幅
+  const pendingBanner = currentUser && currentUser.status === 'pending';
+
   return (
     <div className="app-shell">
       <TopBar
         dark={t.dark} onToggleDark={() => setTweak('dark', !t.dark)}
         onToggleLayout={() => setTweak('layout', t.layout === 'sidebar' ? 'topnav' : t.layout === 'topnav' ? 'rail' : 'sidebar')}
         lastSync="2026-05-28 03:40" onExport={() => setShowExport(true)}
+        user={currentUser} onLogin={() => setShowAuth(true)} onLogout={handleLogout} onNav={nav}
       />
 
       {t.layout === 'topnav' && <TopNav view={navView} onNav={nav} />}
@@ -103,6 +126,15 @@ export default function App() {
 
         <div className="main">
           <div className="content">
+            {pendingBanner && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', marginBottom: 16, borderRadius: 'var(--ore-radius-md)',
+                            background: STATUS_META.pending.bg, border: '1px solid color-mix(in srgb, var(--ore-warning) 40%, transparent)' }}>
+                <i className="pi pi-clock" style={{ color: STATUS_META.pending.color }}></i>
+                <span style={{ fontSize: 13, color: 'var(--ore-fg)' }}>
+                  您的帳號 <strong>審核中</strong>，管理員確認使用資格後即可使用完整查詢與匯出功能。
+                </span>
+              </div>
+            )}
             {detail ? (
               <DetailView t={detail} onBack={() => setDetail(null)} chartMode={t.chartMode} showGrid={t.showGrid} />
             ) : view === 'search' ? (
@@ -115,6 +147,8 @@ export default function App() {
               <AnalysisView chartMode={t.chartMode} showGrid={t.showGrid} barRounded={t.barRounded} />
             ) : view === 'map' ? (
               <MapView barRounded={t.barRounded} showGrid={t.showGrid} />
+            ) : view === 'admin' ? (
+              <AdminView currentUserId={currentUser?.id} onChange={refreshCurrentUser} />
             ) : (
               <DataView />
             )}
