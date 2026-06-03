@@ -36,7 +36,8 @@ designed in [Claude Design](https://claude.ai/design). The original prototype
 
 - [Vite](https://vitejs.dev/) + [React 18](https://react.dev/) + TypeScript
 - Pure-SVG charts (no chart library) driven by the `--brand` CSS variable
-- PrimeIcons (self-hosted via npm), Noto Sans TC (self-hosted under `public/fonts/`)
+- PrimeIcons (self-hosted via npm); Noto Sans TC + JetBrains Mono loaded from
+  Google Fonts via a `<link>` in `index.html`
 - OreNote design tokens in `src/styles/tokens.css`
 
 ## Getting started
