@@ -1,0 +1,18 @@
+# 正式環境覆寫（顯式以 -f 指定，不會載入 override.yml）
+#   - DB / Redis 不對外開 port（僅內網）
+#   - restart: always
+#   - nginx 對外發佈於主機 8080（cloudflared 仍走內網 nginx:80）
+services:
+  postgres:
+    restart: always
+
+  redis:
+    restart: always
+
+  api:
+    restart: always
+
+  nginx:
+    restart: always
+    ports:
+      - "${NGINX_HTTP_PORT:-8080}:80"

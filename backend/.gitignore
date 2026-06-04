@@ -1,0 +1,7 @@
+# secrets / 環境
+.env
+
+# .NET build 產物
+bin/
+obj/
+*.user

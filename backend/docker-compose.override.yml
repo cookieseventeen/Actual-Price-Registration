@@ -1,0 +1,12 @@
+# 開發覆寫（docker compose 預設自動載入）
+# 目的：把 DB / Redis 的 port 對外開到本機，讓本機 `dotnet run` 直接串接，
+#       不需把 API 包成容器；改碼免 rebuild。
+# 注意：host port 預設避開常見衝突（5432/6379），用 5433/6380，可在 .env 覆寫。
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+
+  redis:
+    ports:
+      - "${REDIS_PORT:-6380}:6379"

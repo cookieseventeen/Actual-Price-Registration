@@ -1,0 +1,108 @@
+// 實價通 資料庫 schema (PostgreSQL)
+// 依 InitialCreate migration 產生；欄位名沿用 EF 預設 PascalCase。
+// 線上預覽/出圖：貼到 https://dbdiagram.io
+//
+// 列舉欄位（Provider/Plan/Status）在 DB 實際以 varchar(16) 字串儲存；
+// 下方用 Enum 標示僅為語意清晰。
+
+Project shijiatong {
+  database_type: 'PostgreSQL'
+  Note: '台中市實價登錄查詢服務 — districts / transactions / members / crawl_tasks'
+}
+
+Enum member_provider {
+  google
+  apple
+}
+
+Enum member_plan {
+  free
+  pro
+  enterprise
+}
+
+Enum member_status {
+  pending   [note: '待審核（註冊預設）']
+  active    [note: '已啟用']
+  rejected  [note: '已拒絕']
+  suspended [note: '已停權']
+}
+
+Enum crawl_status {
+  done
+  running
+  queued
+  error
+}
+
+Table districts {
+  Id           varchar(32)  [pk, note: '代碼，如 xitun']
+  Name         text         [not null, note: '西屯區']
+  Zone         text         [not null, note: '七期 / 單元二']
+  AvgUnitPrice "numeric(6,2)" [not null, note: '平均單價（萬/坪）']
+  ChangePct    "numeric(5,2)" [not null, note: '年變化（%）']
+  Volume       integer      [not null, note: '成交量']
+
+  Note: '行政區統計，對應前端 District'
+}
+
+Table transactions {
+  Id         varchar(32)  [pk, note: '如 T0001']
+  Community  text         [not null, note: '社區名']
+  DistrictId varchar(32)  [not null, ref: > districts.Id, note: 'FK → districts.Id']
+  Road       text         [not null]
+  Section    text         [not null, note: '重劃區 / 生活圈']
+  Type       text         [not null, note: '住宅大樓 / 華廈 / 透天 …']
+  Total      integer      [not null, note: '總價（萬）']
+  Unit       "numeric(6,2)" [not null, note: '單價（萬/坪）']
+  Ping       "numeric(7,2)" [not null, note: '坪數']
+  Floor      text         [not null, note: '18/26']
+  Age        integer      [not null, note: '屋齡']
+  Layout     text         [not null, note: '4房2廳']
+  Rooms      integer      [not null]
+  Trade      text         [not null, note: '成屋 / 預售屋']
+  Date       date         [not null, note: '成交日']
+  Source     text         [not null, note: '內政部']
+  CrawledAt  timestamptz  [not null, note: '爬取時間（UTC）']
+  Lat        "double precision" [not null]
+  Lng        "double precision" [not null]
+  Parking    text         [not null]
+
+  indexes {
+    DistrictId
+    Community
+    Date
+  }
+  Note: '單一物件成交紀錄，對應前端 Transaction'
+}
+
+Table members {
+  Id         uuid          [pk]
+  Name       text          [not null]
+  Email      text          [not null, unique]
+  Avatar     text          [not null, note: '顯示首字']
+  Provider   member_provider [not null, note: 'DB 存 varchar(16)']
+  Plan       member_plan     [not null, note: 'DB 存 varchar(16)']
+  Status     member_status   [not null, note: 'DB 存 varchar(16)']
+  Purpose    text          [not null, note: '使用用途']
+  CreatedAt  timestamptz   [not null]
+  ReviewedAt timestamptz   [null, note: '最後審核時間']
+  Note       text          [null]
+
+  Note: '會員（SSO 註冊 + 後台審核），對應前端 Member'
+}
+
+Table crawl_tasks {
+  Id           varchar(32) [pk, note: '如 C01']
+  DistrictName text        [not null]
+  Status       crawl_status [not null, note: 'DB 存 varchar(16)']
+  Records      integer     [not null]
+  LastRun      timestamptz [null, note: 'running 時為 null']
+  Next         timestamptz [null]
+  Duration     text        [not null, note: '4分12秒 / —']
+
+  Note: '爬蟲任務狀態，對應前端 CrawlTask'
+}
+
+// 關聯
+Ref: transactions.DistrictId > districts.Id [delete: restrict, update: no action]
