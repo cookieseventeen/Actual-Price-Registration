@@ -64,6 +64,7 @@ services:
     image: nginx:1.27-alpine
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../dist:/usr/share/nginx/html:ro   # 前端 build 產物（vite build --base=/）
     depends_on:
       api:
         condition: service_healthy
