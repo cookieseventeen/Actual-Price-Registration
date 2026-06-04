@@ -10,6 +10,7 @@ using Shijiatong.Api.Features.Health;
 using Shijiatong.Api.Features.Members;
 using Shijiatong.Api.Features.Transactions;
 using Shijiatong.Api.Infrastructure;
+using Shijiatong.Api.Infrastructure.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,9 @@ builder.Services.AddOpenApi();
 // 統一錯誤模型：未捕捉例外與錯誤狀態碼一律回 RFC 9457 ProblemDetails。
 builder.Services.AddProblemDetails();
 
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
+builder.Services.AddShijiatongAuth(builder.Configuration);
+
 var app = builder.Build();
 
 await MigrateAndSeedAsync(app);
@@ -68,6 +72,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+
+if (app.Configuration.GetValue<bool>($"{AuthOptions.SectionName}:Enabled"))
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.MapHealthEndpoints();
 app.MapDistrictEndpoints();

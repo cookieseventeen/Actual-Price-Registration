@@ -33,6 +33,10 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
 
     public HttpClient Client { get; private set; } = null!;
 
+    /// <summary>以 <c>Auth:Enabled=true</c> 建立獨立 client（其餘連線設定與預設 fixture 相同）。</summary>
+    public HttpClient CreateAuthEnabledClient() =>
+        _factory!.WithWebHostBuilder(b => b.UseSetting("Auth:Enabled", "true")).CreateClient();
+
     public async Task InitializeAsync()
     {
         // dotnet SDK 容器 + 掛載 docker.sock（DinD）：Ryuk 常失敗，改由測試結束時手動 Dispose 容器
