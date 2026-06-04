@@ -84,7 +84,7 @@ app.MapDistrictEndpoints();
 app.MapTransactionEndpoints();
 app.MapAnalysisEndpoints();
 app.MapCrawlTaskEndpoints();
-app.MapMemberEndpoints();
+app.MapMemberEndpoints(app.Configuration);
 
 app.Run();
 

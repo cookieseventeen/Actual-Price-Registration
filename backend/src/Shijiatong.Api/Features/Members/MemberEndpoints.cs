@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Shijiatong.Api.Contracts;
 using Shijiatong.Api.Domain.Entities;
 using Shijiatong.Api.Infrastructure;
+using Shijiatong.Api.Infrastructure.Auth;
 
 namespace Shijiatong.Api.Features.Members;
 
@@ -9,9 +10,9 @@ namespace Shijiatong.Api.Features.Members;
 // TODO(Phase 3)：以 JWT + admin 角色保護以下端點；認證改為真 OAuth。
 public static class MemberEndpoints
 {
-    public static IEndpointRouteBuilder MapMemberEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapMemberEndpoints(this IEndpointRouteBuilder app, IConfiguration configuration)
     {
-        var group = app.MapGroup("/api/members");
+        var group = app.MapGroup("/api/members").RequireAdminWhenProtected(configuration);
 
         group.MapGet("", async (AppDbContext db) =>
         {

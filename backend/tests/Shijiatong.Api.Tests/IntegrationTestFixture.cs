@@ -1,6 +1,8 @@
+using System.Net.Http.Headers;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Shijiatong.Api.Tests.Auth;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 using Xunit;
@@ -36,6 +38,26 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
     /// <summary>以 <c>Auth:Enabled=true</c> 建立獨立 client（其餘連線設定與預設 fixture 相同）。</summary>
     public HttpClient CreateAuthEnabledClient() =>
         _factory!.WithWebHostBuilder(b => b.UseSetting("Auth:Enabled", "true")).CreateClient();
+
+    /// <summary>
+    /// Stage 2：Auth 全開且保護 admin 端點；可選帶入 Bearer token（測試用 SigningKey 與 TestJwtFactory 一致）。
+    /// </summary>
+    public HttpClient CreateAdminProtectedClient(string? bearerToken = null)
+    {
+        var client = _factory!.WithWebHostBuilder(b =>
+        {
+            b.UseSetting("Auth:Enabled", "true");
+            b.UseSetting("Auth:ProtectAdminEndpoints", "true");
+            b.UseSetting("Auth:Jwt:SigningKey", TestJwtFactory.SigningKey);
+            b.UseSetting("Auth:Jwt:Issuer", TestJwtFactory.Issuer);
+            b.UseSetting("Auth:Jwt:Audience", TestJwtFactory.Audience);
+        }).CreateClient();
+
+        if (bearerToken is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+        return client;
+    }
 
     public async Task InitializeAsync()
     {
