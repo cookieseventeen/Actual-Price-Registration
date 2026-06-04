@@ -11,6 +11,7 @@ import { ResultsView } from './components/ResultsView';
 import { DetailView } from './components/DetailView';
 import { AnalysisView } from './components/AnalysisView';
 import { MapView } from './components/MapView';
+import { MapDrillView } from './components/MapDrillView';
 import { DataView, ExportModal } from './components/DataView';
 import { AuthView } from './components/auth/AuthView';
 import { AdminView } from './components/admin/AdminView';
@@ -147,6 +148,8 @@ export default function App() {
               <AnalysisView chartMode={t.chartMode} showGrid={t.showGrid} barRounded={t.barRounded} />
             ) : view === 'map' ? (
               <MapView barRounded={t.barRounded} showGrid={t.showGrid} />
+            ) : view === 'mapDrill' ? (
+              <MapDrillView barRounded={t.barRounded} showGrid={t.showGrid} />
             ) : view === 'admin' ? (
               <AdminView currentUserId={currentUser?.id} onChange={refreshCurrentUser} />
             ) : (

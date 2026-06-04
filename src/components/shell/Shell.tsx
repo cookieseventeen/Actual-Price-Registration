@@ -3,13 +3,14 @@ import { useState } from 'react';
 import type { Member } from '../../lib/auth';
 import { STATUS_META, PLAN_META } from '../../lib/auth';
 
-export type ViewId = 'search' | 'results' | 'analysis' | 'map' | 'data' | 'admin';
+export type ViewId = 'search' | 'results' | 'analysis' | 'map' | 'mapDrill' | 'data' | 'admin';
 
 export const NAV_ITEMS: { id: ViewId; label: string; icon: string }[] = [
   { id: 'search',   label: '搜尋',     icon: 'pi-search' },
   { id: 'results',  label: '成交紀錄', icon: 'pi-list' },
   { id: 'analysis', label: '行情分析', icon: 'pi-chart-bar' },
   { id: 'map',      label: '房價地圖', icon: 'pi-map' },
+  { id: 'mapDrill', label: '地圖探索', icon: 'pi-compass' },
   { id: 'data',     label: '資料來源', icon: 'pi-database' },
   { id: 'admin',    label: '會員管理', icon: 'pi-users' },
 ];
