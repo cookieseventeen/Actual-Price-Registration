@@ -1,4 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 using Shijiatong.Api.Features.Analysis;
 using Shijiatong.Api.Features.CrawlTasks;
 using Shijiatong.Api.Features.Districts;
@@ -8,6 +12,21 @@ using Shijiatong.Api.Features.Transactions;
 using Shijiatong.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("serilog.json", optional: false, reloadOnChange: true);
+if (builder.Environment.IsDevelopment())
+    builder.Configuration.AddJsonFile("serilog.Development.json", optional: true, reloadOnChange: true);
+
+builder.Host.UseSerilog((context, _, configuration) =>
+{
+    var isDev = context.HostingEnvironment.IsDevelopment();
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command",
+            isDev ? LogEventLevel.Information : LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .WriteTo.Console(new CompactJsonFormatter());
+});
 
 var pgConn = builder.Configuration.GetConnectionString("Postgres")
              ?? throw new InvalidOperationException("缺少連線字串 ConnectionStrings:Postgres");
@@ -40,8 +59,13 @@ await MigrateAndSeedAsync(app);
 // 全域例外處理（最前段）：未捕捉例外 → 500 ProblemDetails，Production 不洩漏 stack trace。
 app.UseExceptionHandler();
 
+app.UseSerilogRequestLogging();
+
 if (app.Environment.IsDevelopment())
+{
     app.MapOpenApi(); // /openapi/v1.json
+    app.MapScalarApiReference(); // /scalar
+}
 
 app.UseCors();
 

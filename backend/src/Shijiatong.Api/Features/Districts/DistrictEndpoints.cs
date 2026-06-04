@@ -22,6 +22,17 @@ public static class DistrictEndpoints
         .WithName("ListDistricts")
         .WithSummary("行政區統計列表（Redis 快取 5 分鐘）");
 
+        app.MapGet("/api/districts/{id}", async (string id, AppDbContext db) =>
+        {
+            var district = await db.Districts.AsNoTracking()
+                .FirstOrDefaultAsync(d => d.Id == id);
+            return district is null
+                ? Results.Problem(statusCode: 404, title: "找不到行政區")
+                : Results.Ok(DistrictDto.From(district));
+        })
+        .WithName("GetDistrict")
+        .WithSummary("單一行政區詳情");
+
         return app;
     }
 }
