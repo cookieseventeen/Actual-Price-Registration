@@ -26,7 +26,7 @@ public sealed class AuthAdminEndpointTests(IntegrationTestFixture fx)
     [Fact]
     public async Task Members_WhenProtectionOn_NonAdminToken_Returns403()
     {
-        using var client = fx.CreateAdminProtectedClient(TestJwtFactory.CreateToken("user"));
+        using var client = fx.CreateAdminProtectedClient(TestJwtFactory.CreateToken("member"));
         Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/api/members")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden,
             (await client.PatchAsJsonAsync($"/api/members/{Guid.NewGuid()}/status", new { status = "active" }))

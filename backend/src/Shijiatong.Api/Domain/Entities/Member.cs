@@ -14,6 +14,7 @@ public class Member
     public Provider Provider { get; set; }
     public Plan Plan { get; set; }
     public MemberStatus Status { get; set; }
+    public MemberRole Role { get; set; } = MemberRole.Member;
     public string Purpose { get; set; } = default!;   // 使用用途
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ReviewedAt { get; set; }

@@ -12,7 +12,7 @@ public static class DbSeeder
 
     private static DateOnly D(string s) => DateOnly.Parse(s, CultureInfo.InvariantCulture);
 
-    public static async Task SeedAsync(AppDbContext db)
+    public static async Task SeedAsync(AppDbContext db, IEnumerable<string> adminEmails)
     {
         if (!await db.Districts.AnyAsync())
             db.Districts.AddRange(Districts());
@@ -22,6 +22,8 @@ public static class DbSeeder
 
         if (!await db.Members.AnyAsync())
             db.Members.AddRange(Members());
+
+        await EnsureAdminMembersAsync(db, adminEmails);
 
         if (!await db.CrawlTasks.AnyAsync())
             db.CrawlTasks.AddRange(CrawlTasks());
@@ -93,9 +95,44 @@ public static class DbSeeder
         MemberStatus status, string purpose, string created, string? reviewed = null, string? note = null) => new()
     {
         Id = Guid.NewGuid(), Name = name, Email = email, Avatar = avatar, Provider = provider, Plan = plan,
-        Status = status, Purpose = purpose, CreatedAt = Utc(created),
+        Status = status, Role = MemberRole.Member, Purpose = purpose, CreatedAt = Utc(created),
         ReviewedAt = reviewed is null ? null : Utc(reviewed), Note = note,
     };
+
+    private static async Task EnsureAdminMembersAsync(AppDbContext db, IEnumerable<string> adminEmails)
+    {
+        foreach (var raw in adminEmails)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+
+            var email = raw.Trim();
+            var existing = await db.Members.FirstOrDefaultAsync(m =>
+                m.Email.ToLower() == email.ToLower());
+
+            if (existing is null)
+            {
+                var local = email.Split('@')[0];
+                db.Members.Add(new Member
+                {
+                    Name = local,
+                    Email = email,
+                    Avatar = local.Length > 0 ? local[..1] : "?",
+                    Provider = Provider.Google,
+                    Plan = Plan.Enterprise,
+                    Status = MemberStatus.Active,
+                    Role = MemberRole.Admin,
+                    Purpose = "系統管理",
+                    CreatedAt = DateTime.UtcNow,
+                    ReviewedAt = DateTime.UtcNow,
+                });
+            }
+            else if (existing.Role != MemberRole.Admin)
+            {
+                existing.Role = MemberRole.Admin;
+            }
+        }
+    }
 
     private static Member[] Members() =>
     [

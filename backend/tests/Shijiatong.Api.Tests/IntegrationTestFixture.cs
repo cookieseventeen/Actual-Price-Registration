@@ -59,6 +59,28 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
         return client;
     }
 
+    /// <summary>
+    /// Stage 3：Auth 全開（含 Mock SSO）；可選帶入 Bearer token。
+    /// </summary>
+    public HttpClient CreateStage3Client(string? bearerToken = null)
+    {
+        var client = _factory!.WithWebHostBuilder(b =>
+        {
+            b.UseSetting("Auth:Enabled", "true");
+            b.UseSetting("Auth:ProtectAdminEndpoints", "true");
+            b.UseSetting("Auth:MockSsoEnabled", "true");
+            b.UseSetting("Auth:AdminEmails:0", TestAuthSettings.Stage3AdminEmail);
+            b.UseSetting("Auth:Jwt:SigningKey", TestJwtFactory.SigningKey);
+            b.UseSetting("Auth:Jwt:Issuer", TestJwtFactory.Issuer);
+            b.UseSetting("Auth:Jwt:Audience", TestJwtFactory.Audience);
+        }).CreateClient();
+
+        if (bearerToken is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+        return client;
+    }
+
     public async Task InitializeAsync()
     {
         // dotnet SDK 容器 + 掛載 docker.sock（DinD）：Ryuk 常失敗，改由測試結束時手動 Dispose 容器

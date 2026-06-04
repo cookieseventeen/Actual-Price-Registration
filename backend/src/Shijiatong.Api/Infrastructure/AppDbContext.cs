@@ -45,6 +45,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.Provider).HasConversion<string>().HasMaxLength(16);
             e.Property(x => x.Plan).HasConversion<string>().HasMaxLength(16);
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
+            e.Property(x => x.Role)
+                .HasConversion(
+                    v => v == MemberRole.Admin ? "admin" : "member",
+                    v => v.Equals("admin", StringComparison.OrdinalIgnoreCase) ? MemberRole.Admin : MemberRole.Member)
+                .HasMaxLength(16);
         });
 
         b.Entity<CrawlTask>(e =>

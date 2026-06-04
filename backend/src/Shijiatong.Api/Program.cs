@@ -3,12 +3,14 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using Shijiatong.Api.Features.Auth;
 using Shijiatong.Api.Features.Analysis;
 using Shijiatong.Api.Features.CrawlTasks;
 using Shijiatong.Api.Features.Districts;
 using Shijiatong.Api.Features.Health;
 using Shijiatong.Api.Features.Members;
 using Shijiatong.Api.Features.Transactions;
+using Microsoft.Extensions.Options;
 using Shijiatong.Api.Infrastructure;
 using Shijiatong.Api.Infrastructure.Auth;
 
@@ -85,6 +87,7 @@ app.MapTransactionEndpoints();
 app.MapAnalysisEndpoints();
 app.MapCrawlTaskEndpoints();
 app.MapMemberEndpoints(app.Configuration);
+app.MapAuthEndpoints(app.Configuration);
 
 app.Run();
 
@@ -94,6 +97,7 @@ static async Task MigrateAndSeedAsync(WebApplication app)
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var adminEmails = scope.ServiceProvider.GetRequiredService<IOptions<AuthOptions>>().Value.AdminEmails;
 
     const int maxAttempts = 12;
     for (var attempt = 1; ; attempt++)
@@ -101,7 +105,7 @@ static async Task MigrateAndSeedAsync(WebApplication app)
         try
         {
             await db.Database.MigrateAsync();
-            await DbSeeder.SeedAsync(db);
+            await DbSeeder.SeedAsync(db, adminEmails);
             logger.LogInformation("資料庫 migration 與種子完成");
             return;
         }
