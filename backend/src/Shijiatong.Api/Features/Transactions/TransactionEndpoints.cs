@@ -61,7 +61,9 @@ public static class TransactionEndpoints
         {
             var tx = await db.Transactions.AsNoTracking().Include(t => t.District)
                 .FirstOrDefaultAsync(t => t.Id == id);
-            return tx is null ? Results.NotFound() : Results.Ok(TransactionDto.From(tx));
+            return tx is null
+                ? Results.Problem(statusCode: 404, title: "找不到成交物件")
+                : Results.Ok(TransactionDto.From(tx));
         })
         .WithName("GetTransaction")
         .WithSummary("單筆物件詳情");

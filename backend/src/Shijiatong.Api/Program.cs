@@ -30,9 +30,15 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 
 builder.Services.AddOpenApi();
 
+// 統一錯誤模型：未捕捉例外與錯誤狀態碼一律回 RFC 9457 ProblemDetails。
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 await MigrateAndSeedAsync(app);
+
+// 全域例外處理（最前段）：未捕捉例外 → 500 ProblemDetails，Production 不洩漏 stack trace。
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi(); // /openapi/v1.json
