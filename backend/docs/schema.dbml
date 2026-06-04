@@ -49,7 +49,7 @@ Table districts {
 Table transactions {
   Id         varchar(32)  [pk, note: '如 T0001']
   Community  text         [not null, note: '社區名']
-  DistrictId varchar(32)  [not null, ref: > districts.Id, note: 'FK → districts.Id']
+  DistrictId varchar(32)  [not null, note: 'FK → districts.Id（關聯定義見檔尾 Ref）']
   Road       text         [not null]
   Section    text         [not null, note: '重劃區 / 生活圈']
   Type       text         [not null, note: '住宅大樓 / 華廈 / 透天 …']
