@@ -35,6 +35,11 @@ Enum crawl_status {
   error
 }
 
+Enum member_role {
+  member
+  admin    [note: '後台最高權限；由 Auth:AdminEmails 設定驅動']
+}
+
 Table districts {
   Id           varchar(32)  [pk, note: '代碼，如 xitun']
   Name         text         [not null, note: '西屯區']
@@ -84,6 +89,7 @@ Table members {
   Provider   member_provider [not null, note: 'DB 存 varchar(16)']
   Plan       member_plan     [not null, note: 'DB 存 varchar(16)']
   Status     member_status   [not null, note: 'DB 存 varchar(16)']
+  Role       member_role     [not null, default: 'member', note: 'DB 存 varchar(16)；migration AddMemberRole']
   Purpose    text          [not null, note: '使用用途']
   CreatedAt  timestamptz   [not null]
   ReviewedAt timestamptz   [null, note: '最後審核時間']
