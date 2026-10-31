@@ -2,7 +2,10 @@ using System.Net.Http.Headers;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Shijiatong.Api.Tests.Auth;
+using Shijiatong.Lvr;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 using Xunit;
@@ -81,6 +84,32 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
         return client;
     }
 
+    /// <summary>
+    /// 實價登錄匯入：開 <c>Lvr:ImportEnabled</c>，並以假檔案來源取代真下載（不連外網）。
+    /// <paramref name="protect"/> 時同時開 admin 保護（可帶 Bearer token）。
+    /// </summary>
+    public HttpClient CreateLvrImportClient(ILvrFileSource source, bool protect = false, string? bearerToken = null)
+    {
+        var client = _factory!.WithWebHostBuilder(b =>
+        {
+            b.UseSetting("Lvr:ImportEnabled", "true");
+            if (protect)
+            {
+                b.UseSetting("Auth:Enabled", "true");
+                b.UseSetting("Auth:ProtectAdminEndpoints", "true");
+                b.UseSetting("Auth:Jwt:SigningKey", TestJwtFactory.SigningKey);
+                b.UseSetting("Auth:Jwt:Issuer", TestJwtFactory.Issuer);
+                b.UseSetting("Auth:Jwt:Audience", TestJwtFactory.Audience);
+            }
+            b.ConfigureTestServices(s => s.AddSingleton(source));
+        }).CreateClient();
+
+        if (bearerToken is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+        return client;
+    }
+
     public async Task InitializeAsync()
     {
         // dotnet SDK 容器 + 掛載 docker.sock（DinD）：Ryuk 常失敗，改由測試結束時手動 Dispose 容器
@@ -103,6 +132,8 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
             {
                 builder.UseSetting("ConnectionStrings:Postgres", pgConn);
                 builder.UseSetting("ConnectionStrings:Redis", redisConn);
+                // 工廠預設 Development 環境會開匯入；基礎 client 一律關閉，避免任何測試連到真下載
+                builder.UseSetting("Lvr:ImportEnabled", "false");
             });
 
         Client = _factory.CreateClient();

@@ -85,6 +85,119 @@ namespace Shijiatong.Api.Infrastructure.Migrations
                     b.ToTable("districts", (string)null);
                 });
 
+            modelBuilder.Entity("Shijiatong.Api.Domain.Entities.LvrImportRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("FromCache")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Inserted")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Malformed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RawRows")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<int>("Unchanged")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Updated")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartedAt");
+
+                    b.ToTable("lvr_import_runs", (string)null);
+                });
+
+            modelBuilder.Entity("Shijiatong.Api.Domain.Entities.LvrStagingRecord", b =>
+                {
+                    b.Property<string>("SerialNo")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("County")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Fields")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("FirstImportedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FirstSource")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)");
+
+                    b.Property<Guid>("LastRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastSource")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("SerialNo");
+
+                    b.HasIndex("District");
+
+                    b.HasIndex("LastRunId");
+
+                    b.ToTable("lvr_staging_records", (string)null);
+                });
+
             modelBuilder.Entity("Shijiatong.Api.Domain.Entities.Member", b =>
                 {
                     b.Property<Guid>("Id")

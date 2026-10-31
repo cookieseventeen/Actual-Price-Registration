@@ -44,6 +44,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 | GET | `/api/analysis/price-distribution` · `/api/analysis/city-trend` |
 | GET | `/api/crawl-tasks` |
 | GET | `/api/members` · PATCH `/api/members/{id}/status` · `/plan` |
+| POST | `/api/admin/lvr/import` · GET `/api/admin/lvr/runs` · `/api/admin/lvr/staging/summary`（實價登錄匯入，`Lvr:ImportEnabled` 才開，見 [`docs/lvr-import-poc.md`](docs/lvr-import-poc.md)） |
 
 ## 重啟 / 重建驗證
 
@@ -57,7 +58,18 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod r
 ## 產生 / 更新 EF Migration（本機無 dotnet 時用容器跑）
 
 ```bash
-docker run --rm -v "$PWD/src/Shijiatong.Api":/src -w /src mcr.microsoft.com/dotnet/sdk:10.0 \
+# 掛整個 backend/（API 參照 src/Shijiatong.Lvr）
+docker run --rm -v "$PWD":/src -w /src/src/Shijiatong.Api mcr.microsoft.com/dotnet/sdk:10.0 \
   bash -lc "dotnet tool install -g dotnet-ef && export PATH=\$PATH:/root/.dotnet/tools && \
             dotnet ef migrations add <Name> -o Infrastructure/Migrations"
+```
+
+## 測試（本機無 dotnet 時用容器跑）
+
+```bash
+# 單元測試（純函式）
+docker run --rm -v "$PWD":/src -w /src mcr.microsoft.com/dotnet/sdk:10.0 dotnet test tests/Shijiatong.Lvr.Tests
+# 整合測試（Testcontainers 需掛 docker.sock）
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD":/src -w /src \
+  mcr.microsoft.com/dotnet/sdk:10.0 dotnet test tests/Shijiatong.Api.Tests
 ```

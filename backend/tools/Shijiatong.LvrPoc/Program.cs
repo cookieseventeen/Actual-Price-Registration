@@ -63,7 +63,7 @@ if (seasons.Count > 0 || current)
     using var http = LvrDownloader.CreateHttpClient();
     var downloader = new LvrDownloader(http, cacheDir, TimeSpan.FromSeconds(interval));
     var refs = seasons.Select(s => LvrSources.Season(s)).ToList();
-    if (current) refs.Add(LvrSources.Current(TaipeiToday()));
+    if (current) refs.Add(LvrSources.Current(LvrSources.TaipeiToday(DateTime.UtcNow)));
 
     foreach (var r in refs)
     {
@@ -88,6 +88,3 @@ if (outPath is not null)
     Console.Error.WriteLine($"[報告] 已寫入 {outPath}");
 }
 return 0;
-
-static DateOnly TaipeiToday() =>
-    DateOnly.FromDateTime(DateTime.UtcNow.AddHours(8)); // 台灣無日光節約，固定 UTC+8

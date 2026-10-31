@@ -21,4 +21,8 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Shijiatong.Lvr\Shijiatong.Lvr.csproj" />
+  </ItemGroup>
+
 </Project>

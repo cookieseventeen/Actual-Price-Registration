@@ -1,4 +1,4 @@
-# 實價登錄資料匯入 — 第 1 段 PoC（B1）
+# 實價登錄資料匯入（roadmap B）— 第 1 段 PoC、第 2 段 staging
 
 > 2026-10-31。範圍：台中市「不動產買賣」（`b_lvr_land_a.csv`）。**只下載＋解析＋統計，不寫 DB、不動既有資料。**
 > 已決定：先只做買賣；座標先用行政區中心點；真實資料**直接取代** demo 種子資料。
@@ -50,9 +50,9 @@ docker run --rm -v "$PWD":/src -v shijiatong-nuget:/root/.nuget/packages -w /src
 7. **行政區**：真實資料有 28 區，現有種子 12 區只涵蓋 75.7% 筆數 → 直接取代時 `districts` 要擴成全台中 29 區（含和平區）。
 8. **確定缺的欄位**：社區名（買賣檔沒有）、經緯度（沒有，門牌去識別化）、重劃區/生活圈（沒有）。
 
-## 第 2、3 段要先拍板的事
+## 第 2、3 段決策（2026-10-31 使用者確認：全部照建議）
 
-| # | 問題 | 建議 |
+| # | 問題 | 決定 |
 |---|---|---|
 | 1 | 預售屋交屋（51.8%）怎麼處理 | 保留，`Trade` 標成「預售屋」（其餘「成屋」），趨勢圖預設依成交日、可篩掉；不另抓預售屋 b 檔以免重複計算 |
 | 2 | 單價異常值 | 匯入時保留原值但標 `IsOutlier`（< 5 或 > 200 萬/坪），統計/趨勢排除 |
@@ -60,4 +60,42 @@ docker run --rm -v "$PWD":/src -v shijiatong-nuget:/root/.nuget/packages -w /src
 | 4 | 經緯度 | 依決定先用行政區中心點；`Lat/Lng` 保留欄位，之後再 geocoding |
 | 5 | 重劃區 `Section` / 區 `Zone` | 改可為空（或之後用路名對照表補） |
 | 6 | 29 區 id | 沿用現有拼音 id（xitun…），新增 17 區照同規則 |
-| 7 | API Docker build context | 目前是 `src/Shijiatong.Api`，API 參照 `Shijiatong.Lvr` 後要改成 `backend/` |
+| 7 | API Docker build context | ✅ 第 2 段已改為 `backend/`（Dockerfile 仍在 `src/Shijiatong.Api/`，`.dockerignore` 移到 `backend/`） |
+
+---
+
+# 第 2 段：原始資料暫存表 + 手動匯入（已完成）
+
+原始列**完整保留**到 staging，尚未轉成 `transactions`（第 3 段才做），所以既有 demo 資料與所有公開端點都不受影響。
+
+| 表 | 用途 |
+|---|---|
+| `lvr_staging_records` | 一列 = 一筆原始資料。PK = 官方「編號」；`Fields` 為 jsonb（中文欄名 → 原字串）；`ContentHash` 偵測官方更正 |
+| `lvr_import_runs` | 每次匯入一筆：來源、狀態（running / succeeded / noData / failed）、新增 / 更新 / 未變 / 格式錯誤筆數、耗時 |
+
+匯入規則：同編號且內容雜湊相同 → 略過；雜湊不同 → 覆寫（官方更正）；新編號 → 新增。
+單一檔案的寫入在同一交易內，失敗時整批不落地，只記一筆 `failed` run。同時間只允許一個匯入（第二個回 409）。
+
+## 端點（`Lvr:ImportEnabled=true` 才註冊；Auth 保護開啟時需 admin JWT）
+
+| Method | Path | 說明 |
+|---|---|---|
+| POST | `/api/admin/lvr/import` | body `{"season":"115S3"}` 或 `{"current":true}`，可加 `"refresh":true` 忽略快取重抓 |
+| GET | `/api/admin/lvr/runs?limit=20` | 最近匯入紀錄 |
+| GET | `/api/admin/lvr/staging/summary` | staging 總數、依首次來源、依行政區 |
+
+開關：`appsettings.json` 預設 **false**；`appsettings.Development.json` 為 true；compose 以 `LVR_IMPORT_ENABLED`（預設 false）注入。
+**prod 在 admin 保護真正生效前不要開**，否則任何人都能觸發下載與寫入。下載快取在 compose volume `lvrcache`。
+
+```bash
+# 本機（dotnet run，Development）
+curl -X POST localhost:8080/api/admin/lvr/import -H 'Content-Type: application/json' -d '{"season":"115S3"}'
+curl localhost:8080/api/admin/lvr/staging/summary
+```
+
+## 驗證（2026-10-31，拋棄式 PG/Redis/API 容器 + 新 Dockerfile）
+
+- flag 關 → 404；flag 開 → 115S1 / S2 / S3 / 本期 共 **31,826 筆**入 staging（每檔 0.2–2.6 秒，表約 45 MB）
+- 115S2 有 1 筆「更新」= PoC 發現的跨檔重複編號（官方更正），行為正確
+- 重跑 115S3 → 10,477 筆全部 unchanged（0.3 秒）
+- 既有 `/api/transactions` 仍回 demo 資料；整合測試 36/36、單元測試 59/59

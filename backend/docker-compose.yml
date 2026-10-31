@@ -39,12 +39,19 @@ services:
 
   api:
     build:
-      context: ./src/Shijiatong.Api
+      # context 為 backend/：API 參照 src/Shijiatong.Lvr，需同時納入 build context
+      context: .
+      dockerfile: src/Shijiatong.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-shijiatong};Username=${POSTGRES_USER:-shijiatong};Password=${POSTGRES_PASSWORD:-shijiatong}"
       ConnectionStrings__Redis: "redis:6379"
+      # 實價登錄匯入端點（預設關；prod 開 admin 保護前保持 false）
+      Lvr__ImportEnabled: ${LVR_IMPORT_ENABLED:-false}
+      Lvr__CacheDir: /data/lvr-cache
+    volumes:
+      - lvrcache:/data/lvr-cache
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,6 +91,7 @@ services:
 volumes:
   pgdata:
   redisdata:
+  lvrcache:     # 實價登錄開放資料下載快取（季別檔抓過不再抓）
 
 networks:
   shijiatong-net:

@@ -8,6 +8,7 @@ using Shijiatong.Api.Features.Analysis;
 using Shijiatong.Api.Features.CrawlTasks;
 using Shijiatong.Api.Features.Districts;
 using Shijiatong.Api.Features.Health;
+using Shijiatong.Api.Features.LvrImport;
 using Shijiatong.Api.Features.Members;
 using Shijiatong.Api.Features.Transactions;
 using Microsoft.Extensions.Options;
@@ -57,6 +58,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
 builder.Services.AddShijiatongAuth(builder.Configuration);
+builder.Services.AddLvrImport(builder.Configuration);
 
 var app = builder.Build();
 
@@ -88,6 +90,7 @@ app.MapAnalysisEndpoints();
 app.MapCrawlTaskEndpoints();
 app.MapMemberEndpoints(app.Configuration);
 app.MapAuthEndpoints(app.Configuration);
+app.MapLvrImportEndpoints(app.Configuration);
 
 app.Run();
 

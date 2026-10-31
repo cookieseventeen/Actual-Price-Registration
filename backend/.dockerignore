@@ -1,0 +1,15 @@
+# API 映像 build context = backend/（Dockerfile 在 src/Shijiatong.Api/）
+**/bin/
+**/obj/
+*.user
+.vs/
+.vscode/
+
+# 不進 build context：secrets、快取、與 API 映像無關的目錄
+.env
+.lvr-cache/
+tests/
+tools/
+docs/
+nginx/
+cloudflared/

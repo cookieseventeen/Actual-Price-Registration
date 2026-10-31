@@ -110,5 +110,53 @@ Table crawl_tasks {
   Note: '爬蟲任務狀態，對應前端 CrawlTask'
 }
 
+Enum lvr_import_status {
+  Running
+  Succeeded
+  NoData    [note: '官方無此季別資料']
+  Failed
+}
+
+Table lvr_staging_records {
+  SerialNo        varchar(32)  [pk, note: '官方「編號」，重跑匯入的冪等鍵']
+  County          varchar(4)   [not null, note: 'b = 台中']
+  Kind            varchar(4)   [not null, note: 'a = 不動產買賣']
+  District        varchar(16)  [not null, note: '鄉鎮市區']
+  Fields          jsonb        [not null, note: '原始欄位（中文欄名 → 字串）']
+  ContentHash     varchar(64)  [not null, note: 'Fields SHA-256，偵測官方更正']
+  FirstSource     varchar(32)  [not null, note: '115S3 / current-20261031']
+  LastSource      varchar(32)  [not null]
+  FirstImportedAt timestamptz  [not null]
+  UpdatedAt       timestamptz  [not null]
+  LastRunId       uuid         [not null, note: '→ lvr_import_runs.Id（未設 FK）']
+
+  indexes {
+    District
+    LastRunId
+  }
+  Note: '實價登錄開放資料原始列 staging（migration AddLvrStaging）'
+}
+
+Table lvr_import_runs {
+  Id         uuid          [pk]
+  Source     varchar(32)   [not null]
+  Url        varchar(512)  [not null]
+  Status     lvr_import_status [not null, note: 'DB 存 varchar(16)']
+  StartedAt  timestamptz   [not null]
+  FinishedAt timestamptz   [null]
+  FromCache  boolean       [not null]
+  RawRows    integer       [not null]
+  Malformed  integer       [not null]
+  Inserted   integer       [not null]
+  Updated    integer       [not null]
+  Unchanged  integer       [not null]
+  Error      text          [null]
+
+  indexes {
+    StartedAt
+  }
+  Note: '每次匯入執行紀錄'
+}
+
 // 關聯
 Ref: transactions.DistrictId > districts.Id [delete: restrict, update: no action]

@@ -9,6 +9,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<CrawlTask> CrawlTasks => Set<CrawlTask>();
+    public DbSet<LvrStagingRecord> LvrStagingRecords => Set<LvrStagingRecord>();
+    public DbSet<LvrImportRun> LvrImportRuns => Set<LvrImportRun>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -58,6 +60,32 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasMaxLength(32);
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
+        });
+
+        b.Entity<LvrStagingRecord>(e =>
+        {
+            e.ToTable("lvr_staging_records");
+            e.HasKey(x => x.SerialNo);
+            e.Property(x => x.SerialNo).HasMaxLength(32);
+            e.Property(x => x.County).HasMaxLength(4);
+            e.Property(x => x.Kind).HasMaxLength(4);
+            e.Property(x => x.District).HasMaxLength(16);
+            e.Property(x => x.Fields).HasColumnType("jsonb");
+            e.Property(x => x.ContentHash).HasMaxLength(64);
+            e.Property(x => x.FirstSource).HasMaxLength(32);
+            e.Property(x => x.LastSource).HasMaxLength(32);
+            e.HasIndex(x => x.District);
+            e.HasIndex(x => x.LastRunId);
+        });
+
+        b.Entity<LvrImportRun>(e =>
+        {
+            e.ToTable("lvr_import_runs");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Source).HasMaxLength(32);
+            e.Property(x => x.Url).HasMaxLength(512);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
+            e.HasIndex(x => x.StartedAt);
         });
     }
 }
