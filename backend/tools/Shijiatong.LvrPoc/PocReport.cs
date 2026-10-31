@@ -138,8 +138,8 @@ public static class PocReport
             .GroupBy(x => x.SerialNo).ToDictionary(g => g.Key, g => g.Last().Latest);
         foreach (var (name, group) in new[]
                  {
-                     ("含預售/分件登記備註", all.Where(IsPresaleTransfer).ToList()),
-                     ("一般成屋", all.Where(t => !IsPresaleTransfer(t)).ToList()),
+                     ("含預售/分件登記備註", all.Where(t => t.IsPresaleTransfer).ToList()),
+                     ("一般成屋", all.Where(t => !t.IsPresaleTransfer).ToList()),
                  })
         {
             if (group.Count == 0) continue;
@@ -191,7 +191,7 @@ public static class PocReport
         L();
         var units = all.Select(t => t.Unit).Order().ToList();
         L($"- 最小 {units[0]:0.00}｜P1 {Quantile(units, 0.01):0.00}｜P50 {Quantile(units, 0.5):0.00}｜P99 {Quantile(units, 0.99):0.00}｜最大 {units[^1]:0.00}");
-        L($"- 疑似異常：< 5 萬/坪 {units.Count(u => u < 5):N0} 筆；> 200 萬/坪 {units.Count(u => u > 200):N0} 筆");
+        L($"- 疑似異常：< {LvrNormalizer.MinReasonableUnit} 萬/坪 {units.Count(u => u < LvrNormalizer.MinReasonableUnit):N0} 筆；> {LvrNormalizer.MaxReasonableUnit} 萬/坪 {units.Count(u => u > LvrNormalizer.MaxReasonableUnit):N0} 筆");
         var pricedParking = all.Where(t => t.ParkingPriceNtd > 0 && t.Ping > 0).ToList();
         var parkingIncluded = all.Count(t => t.ParkingType is not null && t.ParkingPriceNtd == 0);
         L($"- 有車位 {all.Count(t => t.ParkingType is not null):N0} 筆：車位單獨計價 {pricedParking.Count:N0} 筆、車位價併入總價（官方單價無法扣除）{parkingIncluded:N0} 筆");
@@ -225,9 +225,6 @@ public static class PocReport
         void Row(string name, int ok, string note) =>
             L($"| {name} | {ok:N0} | {Pct(ok, all.Count)} | {note} |");
     }
-
-    private static bool IsPresaleTransfer(LvrTransaction t) =>
-        t.Notes.Any(n => n.Contains("預售屋、或土地及建物分件登記", StringComparison.Ordinal));
 
     private static string ReasonLabel(LvrExclusion r) => r switch
     {

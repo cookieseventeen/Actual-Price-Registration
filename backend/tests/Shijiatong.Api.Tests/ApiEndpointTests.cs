@@ -40,6 +40,7 @@ public sealed class ApiEndpointTests(IntegrationTestFixture fx)
         Assert.NotEmpty(items);
         Assert.False(string.IsNullOrEmpty(items[0].GetProperty("id").GetString()));
         Assert.False(string.IsNullOrEmpty(items[0].GetProperty("name").GetString()));
+        Assert.Equal(29, items.Length); // 台中 29 區
     }
 
     [Fact]
@@ -71,12 +72,12 @@ public sealed class ApiEndpointTests(IntegrationTestFixture fx)
     public async Task Transactions_FilterByTypeLayoutTradeAndQ()
     {
         var res = await _client.GetAsync(
-            "/api/transactions?type=住宅大樓&layout=4房2廳&trade=成屋&q=聯聚");
+            "/api/transactions?type=住宅大樓&layout=3房2廳&trade=成屋&q=市政路");
         res.EnsureSuccessStatusCode();
         var items = (await res.Content.ReadFromJsonAsync<JsonElement>())!
             .GetProperty("items").EnumerateArray().ToList();
         Assert.NotEmpty(items);
-        Assert.Contains(items, i => i.GetProperty("id").GetString() == "T0001");
+        Assert.Contains(items, i => i.GetProperty("id").GetString() == LvrTestData.XitunExisting);
     }
 
     [Fact]
@@ -94,11 +95,12 @@ public sealed class ApiEndpointTests(IntegrationTestFixture fx)
     [Fact]
     public async Task TransactionById_Existing_ReturnsOk()
     {
-        var res = await _client.GetAsync("/api/transactions/T0001");
+        var res = await _client.GetAsync($"/api/transactions/{LvrTestData.XitunExisting}");
         res.EnsureSuccessStatusCode();
         var body = await res.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal("T0001", body.GetProperty("id").GetString());
-        Assert.Equal("聯聚理仁", body.GetProperty("community").GetString());
+        Assert.Equal(LvrTestData.XitunExisting, body.GetProperty("id").GetString());
+        Assert.Equal(JsonValueKind.Null, body.GetProperty("community").ValueKind); // 買賣資料無社區名
+        Assert.Equal("市政路", body.GetProperty("road").GetString());
     }
 
     [Fact]

@@ -99,3 +99,32 @@ curl localhost:8080/api/admin/lvr/staging/summary
 - 115S2 有 1 筆「更新」= PoC 發現的跨檔重複編號（官方更正），行為正確
 - 重跑 115S3 → 10,477 筆全部 unchanged（0.3 秒）
 - 既有 `/api/transactions` 仍回 demo 資料；整合測試 36/36、單元測試 59/59
+
+---
+
+# 第 3 段：staging → transactions，取代 demo（已完成）
+
+`POST /api/admin/lvr/rebuild`（與匯入同一把鎖、同一個開關）：讀全部台中買賣 staging → `LvrNormalizer` →
+**全量取代** `transactions` → 重算 29 區統計 → 清 `districts:all` 快取。刪除與寫入在同一交易，失敗整批回滾。
+匯入後要手動呼叫一次 rebuild 才會反映到公開端點（第 4 段排程會自動串起來）。
+
+| 決策 | 實作 |
+|---|---|
+| 預售屋交屋 | `Trade = "預售屋"`（其餘「成屋」），`Date` 保留簽約日；`/api/analysis/*` 可帶 `trade=成屋` 篩掉 |
+| 單價異常值 | `IsOutlier`（< 5 或 > 200 萬/坪，門檻在 `LvrNormalizer`）；列表/詳情照常顯示，所有 `/api/analysis/*` 與 districts 統計排除 |
+| 缺欄位 | `Community`、`Section`、`Zone`、`Age` 改可為空；新增 `Address`（去識別化門牌）供前端顯示 |
+| 座標 | `Lat/Lng` = 行政區中心點（`Domain/TaichungDistricts.cs`，約略區公所位置）；districts 也新增 `Lat/Lng` |
+| 29 區 | 原 12 區 id 不變，新增 17 區（shalu、wuqi…）；`DbSeeder` 啟動時補齊，不動統計 |
+| 區統計 | 以資料最新交易日為基準、**只用一般成屋**（預售屋交屋的交易日是簽約日）、排除異常值：近 12 個月平均單價 / 筆數；年變化只在前 12 個月 ≥ 10 筆且 ≥ 近 12 個月筆數一半時計算，否則 `null`（資料不足） |
+| demo | migration `ReplaceDemoWithLvrData` 刪除 T0001–T0022、統計歸零；`DbSeeder` 不再灌 demo 成交 |
+| city-trend | 原本寫死的假數字改為真實資料（最新交易月往回 12 個月） |
+
+API 契約變更（前端尚未串接，影響僅在 roadmap E）：`TransactionDto` 新增 `address`、`isOutlier`，
+`community` / `section` / `age` 可為 null；`DistrictDto` 新增 `lat` / `lng`，`zone` 可為 null。
+
+**為什麼年變化目前多為 null**：只匯入 115 年季別時，前 12 個月（2024-10 ~ 2025-09）幾乎只有遲延登記與預售屋交屋，
+例如西屯近 12 月 1,489 筆成屋、前 12 月只有 50 筆（均價 48.1 vs 36.9）——硬算會得到約 -23% 的假跌幅。
+回補 114 年季別（第 4 段）後前期涵蓋度足夠，年變化就會自動算出來。
+
+上線順序（prod）：部署新版 → 啟動自動套 migration（demo 清除）→ 開 admin 保護（A1）→ 開 `LVR_IMPORT_ENABLED`
+→ 依序 import 季別 / 本期 → rebuild。**在 rebuild 之前公開端點會是空的**。

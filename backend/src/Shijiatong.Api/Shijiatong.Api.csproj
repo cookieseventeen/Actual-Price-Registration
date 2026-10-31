@@ -25,4 +25,8 @@
     <ProjectReference Include="..\Shijiatong.Lvr\Shijiatong.Lvr.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Shijiatong.Api.Tests" />
+  </ItemGroup>
+
 </Project>

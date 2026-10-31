@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -137,6 +138,11 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
             });
 
         Client = _factory.CreateClient();
+
+        // 成交資料不再有 demo 種子：走真實流程（假下載來源 → import → rebuild）準備基礎資料
+        using var lvr = CreateLvrImportClient(new FakeLvrFileSource { Csv = LvrTestData.FixtureCsv });
+        (await lvr.PostAsJsonAsync("/api/admin/lvr/import", new { season = "115S3" })).EnsureSuccessStatusCode();
+        (await lvr.PostAsync("/api/admin/lvr/rebuild", null)).EnsureSuccessStatusCode();
     }
 
     public async Task DisposeAsync()

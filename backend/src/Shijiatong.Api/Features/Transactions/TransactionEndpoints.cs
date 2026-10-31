@@ -33,8 +33,9 @@ public static class TransactionEndpoints
             {
                 var k = q.Trim();
                 query = query.Where(t =>
-                    t.Community.Contains(k) || t.Road.Contains(k) ||
-                    t.Section.Contains(k) || t.District!.Name.Contains(k));
+                    (t.Community != null && t.Community.Contains(k)) || t.Road.Contains(k) ||
+                    (t.Address != null && t.Address.Contains(k)) ||
+                    (t.Section != null && t.Section.Contains(k)) || t.District!.Name.Contains(k));
             }
 
             if (!string.IsNullOrWhiteSpace(type)) query = query.Where(t => t.Type == type);

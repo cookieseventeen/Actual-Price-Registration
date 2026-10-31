@@ -8,11 +8,14 @@ namespace Shijiatong.Api.Features.Districts;
 
 public static class DistrictEndpoints
 {
+    /// <summary>行政區列表快取 key；成交重建後需清除（LvrTransformService）。</summary>
+    public const string ListCacheKey = "districts:all";
+
     public static IEndpointRouteBuilder MapDistrictEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/districts", async (AppDbContext db, IDistributedCache cache) =>
         {
-            var result = await cache.GetOrSetAsync("districts:all", TimeSpan.FromMinutes(5), async () =>
+            var result = await cache.GetOrSetAsync(ListCacheKey, TimeSpan.FromMinutes(5), async () =>
                 await db.Districts.AsNoTracking()
                     .OrderByDescending(d => d.Volume)
                     .Select(d => DistrictDto.From(d))

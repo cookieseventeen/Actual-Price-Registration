@@ -22,6 +22,7 @@ public static class LvrImportEndpoints
             return new LvrDownloader(LvrDownloader.CreateHttpClient(), o.CacheDir, TimeSpan.FromSeconds(o.MinIntervalSeconds));
         });
         services.AddScoped<LvrImportService>();
+        services.AddScoped<LvrTransformService>();
         return services;
     }
 
@@ -64,6 +65,21 @@ public static class LvrImportEndpoints
                 gate.Semaphore.Release();
             }
         }).WithSummary("手動匯入一個季別或本期的台中不動產買賣開放資料到 staging");
+
+        // 第 3 段：staging → transactions 全量重建 + 重算 districts 統計（與匯入共用同一把鎖）
+        group.MapPost("/rebuild", async (LvrTransformService svc, LvrImportGate gate) =>
+        {
+            if (!await gate.Semaphore.WaitAsync(0))
+                return Results.Problem(statusCode: 409, title: "已有匯入或重建正在執行，請稍後再試");
+            try
+            {
+                return Results.Ok(await svc.RebuildAsync());
+            }
+            finally
+            {
+                gate.Semaphore.Release();
+            }
+        }).WithSummary("由 staging 重建成交資料（取代既有 transactions）並重算行政區統計");
 
         group.MapGet("/runs", async (int? limit, AppDbContext db) =>
         {

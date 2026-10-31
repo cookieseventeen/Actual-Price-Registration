@@ -41,44 +41,48 @@ Enum member_role {
 }
 
 Table districts {
-  Id           varchar(32)  [pk, note: '代碼，如 xitun']
+  Id           varchar(32)  [pk, note: '拼音代碼，如 xitun（台中 29 區）']
   Name         text         [not null, note: '西屯區']
-  Zone         text         [not null, note: '七期 / 單元二']
-  AvgUnitPrice "numeric(6,2)" [not null, note: '平均單價（萬/坪）']
-  ChangePct    "numeric(5,2)" [not null, note: '年變化（%）']
-  Volume       integer      [not null, note: '成交量']
+  Zone         text         [null, note: '生活圈說明（原 12 區有，其餘 null）']
+  AvgUnitPrice "numeric(6,2)" [not null, note: '近 12 個月平均單價（萬/坪，一般成屋、排除異常值）；重建時計算']
+  ChangePct    "numeric(5,2)" [null, note: '近 12 個月 vs 前 12 個月（%，一般成屋）；前期樣本不足為 null']
+  Volume       integer      [not null, note: '近 12 個月成交筆數']
+  Lat          "double precision" [not null, note: '約略中心點（區公所附近）']
+  Lng          "double precision" [not null]
 
-  Note: '行政區統計，對應前端 District'
+  Note: '台中市行政區與統計（migration ReplaceDemoWithLvrData；統計由 /api/admin/lvr/rebuild 重算）'
 }
 
 Table transactions {
-  Id         varchar(32)  [pk, note: '如 T0001']
-  Community  text         [not null, note: '社區名']
+  Id         varchar(32)  [pk, note: '官方編號，如 RPQNMLMLRHLGFAB97DA']
+  Community  text         [null, note: '社區名：買賣資料無此欄位 → null']
   DistrictId varchar(32)  [not null, note: 'FK → districts.Id（關聯定義見檔尾 Ref）']
-  Road       text         [not null]
-  Section    text         [not null, note: '重劃區 / 生活圈']
-  Type       text         [not null, note: '住宅大樓 / 華廈 / 透天 …']
+  Road       text         [not null, note: '由門牌抽取的路段；抽不到為空字串']
+  Address    text         [null, note: '去識別化門牌']
+  Section    text         [null, note: '重劃區 / 生活圈：資料無此欄位 → null']
+  Type       text         [not null, note: '住宅大樓 / 華廈 / 公寓 / 透天厝 / 套房']
   Total      integer      [not null, note: '總價（萬）']
-  Unit       "numeric(6,2)" [not null, note: '單價（萬/坪）']
-  Ping       "numeric(7,2)" [not null, note: '坪數']
-  Floor      text         [not null, note: '18/26']
-  Age        integer      [not null, note: '屋齡']
+  Unit       "numeric(6,2)" [not null, note: '單價（萬/坪，官方欄位）']
+  Ping       "numeric(7,2)" [not null, note: '建物移轉總面積（坪，含車位）']
+  Floor      text         [not null, note: '18/26、全/4、1-2/5']
+  Age        integer      [null, note: '屋齡；建築完成年月空白為 null']
   Layout     text         [not null, note: '4房2廳']
   Rooms      integer      [not null]
-  Trade      text         [not null, note: '成屋 / 預售屋']
-  Date       date         [not null, note: '成交日']
+  Trade      text         [not null, note: '成屋 / 預售屋（= 預售屋交屋，Date 為簽約日）']
+  Date       date         [not null, note: '交易日']
   Source     text         [not null, note: '內政部']
-  CrawledAt  timestamptz  [not null, note: '爬取時間（UTC）']
-  Lat        "double precision" [not null]
+  CrawledAt  timestamptz  [not null, note: '取得時間（UTC）']
+  Lat        "double precision" [not null, note: '目前為行政區中心點']
   Lng        "double precision" [not null]
-  Parking    text         [not null]
+  Parking    text         [not null, note: '坡道平面 / … / 無']
+  IsOutlier  boolean      [not null, default: false, note: '單價 < 5 或 > 200 萬/坪：保留顯示、統計排除']
 
   indexes {
     DistrictId
     Community
     Date
   }
-  Note: '單一物件成交紀錄，對應前端 Transaction'
+  Note: '成交紀錄：由 lvr_staging_records 正規化後全量重建（已取代 demo 種子）'
 }
 
 Table members {

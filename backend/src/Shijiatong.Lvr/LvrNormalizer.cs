@@ -44,7 +44,14 @@ public sealed record LvrTransaction(
     decimal ParkingPing,
     long ParkingPriceNtd,
     bool HasElevator,
-    IReadOnlyList<string> Notes);
+    IReadOnlyList<string> Notes)
+{
+    /// <summary>預售屋交屋（或土地建物分件登記）：交易日為當年簽約日，屋齡多為 0。</summary>
+    public bool IsPresaleTransfer => Notes.Any(n => n.Contains(LvrNormalizer.PresaleTransferNote, StringComparison.Ordinal));
+
+    /// <summary>單價異常（保留原值，統計排除）。</summary>
+    public bool IsOutlier => LvrNormalizer.IsUnitOutlier(Unit);
+}
 
 public sealed record LvrNormalizeResult(LvrTransaction? Value, LvrExclusion? Excluded)
 {
@@ -55,6 +62,16 @@ public sealed record LvrNormalizeResult(LvrTransaction? Value, LvrExclusion? Exc
 /// <summary>a 檔（不動產買賣）原始列 → 住宅成屋買賣。只保留可代表市場行情的交易。</summary>
 public static class LvrNormalizer
 {
+    /// <summary>備註中代表「預售屋交屋 / 分件登記」的字樣。</summary>
+    public const string PresaleTransferNote = "預售屋、或土地及建物分件登記";
+
+    /// <summary>單價合理區間（萬/坪）；區間外標為異常值。2026-10 PoC：P1 13.8、P99 77.6。</summary>
+    public const decimal MinReasonableUnit = 5m;
+    public const decimal MaxReasonableUnit = 200m;
+
+    public static bool IsUnitOutlier(decimal unitWanPerPing) =>
+        unitWanPerPing < MinReasonableUnit || unitWanPerPing > MaxReasonableUnit;
+
     private static readonly string[] BuildingTargets = ["房地(土地+建物)", "房地(土地+建物)+車位"];
 
     private static readonly string[] SpecialRelationKeywords = ["親友、員工、共有人或其他特殊關係"];

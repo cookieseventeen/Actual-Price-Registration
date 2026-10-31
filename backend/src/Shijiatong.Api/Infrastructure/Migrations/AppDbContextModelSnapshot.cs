@@ -65,9 +65,15 @@ namespace Shijiatong.Api.Infrastructure.Migrations
                         .HasPrecision(6, 2)
                         .HasColumnType("numeric(6,2)");
 
-                    b.Property<decimal>("ChangePct")
+                    b.Property<decimal?>("ChangePct")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Lng")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -77,7 +83,6 @@ namespace Shijiatong.Api.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Zone")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -263,11 +268,13 @@ namespace Shijiatong.Api.Infrastructure.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
-                    b.Property<int>("Age")
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Age")
                         .HasColumnType("integer");
 
                     b.Property<string>("Community")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CrawledAt")
@@ -283,6 +290,9 @@ namespace Shijiatong.Api.Infrastructure.Migrations
                     b.Property<string>("Floor")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsOutlier")
+                        .HasColumnType("boolean");
 
                     b.Property<double>("Lat")
                         .HasColumnType("double precision");
@@ -310,7 +320,6 @@ namespace Shijiatong.Api.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Section")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Source")
