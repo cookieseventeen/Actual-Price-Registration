@@ -47,6 +47,16 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-shijiatong};Username=${POSTGRES_USER:-shijiatong};Password=${POSTGRES_PASSWORD:-shijiatong}"
       ConnectionStrings__Redis: "redis:6379"
+      # 認證（對應 .env 的 Auth__*；compose 只會把這裡列出的變數傳進容器）
+      # 未設定時 = appsettings 預設（全關）
+      Auth__Enabled: ${Auth__Enabled:-false}
+      Auth__ProtectAdminEndpoints: ${Auth__ProtectAdminEndpoints:-false}
+      Auth__MockSsoEnabled: ${Auth__MockSsoEnabled:-false}
+      Auth__AdminEmails__0: ${Auth__AdminEmails__0:-}
+      Auth__Jwt__Issuer: ${Auth__Jwt__Issuer:-shijiatong}
+      Auth__Jwt__Audience: ${Auth__Jwt__Audience:-shijiatong-web}
+      Auth__Jwt__SigningKey: ${Auth__Jwt__SigningKey:-}
+      Auth__Jwt__AccessTokenMinutes: ${Auth__Jwt__AccessTokenMinutes:-60}
       # 實價登錄匯入端點（預設關；prod 開 admin 保護前保持 false）
       Lvr__ImportEnabled: ${LVR_IMPORT_ENABLED:-false}
       Lvr__CacheDir: /data/lvr-cache
