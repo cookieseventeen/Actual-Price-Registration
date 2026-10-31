@@ -114,6 +114,15 @@ public sealed class LvrRebuildTests(IntegrationTestFixture fx)
     }
 
     [Fact]
+    public async Task DistrictSummary_ChangeNullWhenPriorYearUnderSampled()
+    {
+        // fixture 西屯：今年 1 筆成屋（異常值已排除）、去年 1 筆 → 樣本不足，不可算出年增率
+        var items = await _client.GetFromJsonAsync<JsonElement[]>("/api/analysis/district-summary");
+        var xitun = items!.Single(i => i.GetProperty("districtId").GetString() == "xitun");
+        Assert.Equal(JsonValueKind.Null, xitun.GetProperty("changePct").ValueKind);
+    }
+
+    [Fact]
     public async Task CityTrend_ComputedFromRealData_TwelveMonths()
     {
         var body = await _client.GetFromJsonAsync<JsonElement>("/api/analysis/city-trend");

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shijiatong.Api.Domain.Entities;
+using Shijiatong.Api.Features.LvrImport;
 using Shijiatong.Api.Infrastructure;
 
 namespace Shijiatong.Api.Features.Analysis;
@@ -99,25 +100,30 @@ public static class AnalysisEndpoints
                     AvgUnit = g.Average(t => t.Unit),
                     Count = g.Count(),
                     ThisYearAvg = g.Where(t => t.Date >= thisYear).Average(t => (decimal?)t.Unit),
+                    ThisYearCount = g.Count(t => t.Date >= thisYear),
                     LastYearAvg = g.Where(t => t.Date >= lastYear && t.Date < thisYear)
                         .Average(t => (decimal?)t.Unit),
+                    LastYearCount = g.Count(t => t.Date >= lastYear && t.Date < thisYear),
                 })
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
+            // 年增率與 districts.change 同一套門檻：前期樣本不足（筆數或涵蓋度）時為 null，避免假跌幅
             var items = rows.Select(x => new DistrictSummaryItem(
                 x.DistrictId,
                 x.DistrictName,
                 Math.Round(x.AvgUnit, 1),
                 x.Count,
                 x.LastYearAvg is > 0 and var ly && x.ThisYearAvg is { } ty
+                    && x.LastYearCount >= LvrTransformService.MinPriorCountForChange
+                    && x.LastYearCount >= x.ThisYearCount * LvrTransformService.MinPriorCoverageRatio
                     ? Math.Round((ty - ly) / ly * 100, 1)
                     : null)).ToList();
 
             return Results.Ok(items);
         })
         .WithName("DistrictSummary")
-        .WithSummary("各區彙總（均價、件數、年增率，排除異常值）");
+        .WithSummary("各區彙總（均價、件數、年增率；排除異常值，前期樣本不足時年增率為 null）");
 
         app.MapGet("/api/analysis/trend", async (AppDbContext db, string? district, string? trade) =>
         {
