@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    內政部實價登錄開放資料：下載 / CSV 解析 / 正規化。
+    純函式庫，不相依 EF / ASP.NET，供 PoC 工具與（之後的）API 匯入流程共用。
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Shijiatong.Lvr</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Shijiatong.Lvr.Tests" />
+  </ItemGroup>
+
+</Project>

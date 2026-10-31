@@ -5,3 +5,6 @@
 bin/
 obj/
 *.user
+
+# 實價登錄開放資料下載快取（PoC / 匯入）
+.lvr-cache/
